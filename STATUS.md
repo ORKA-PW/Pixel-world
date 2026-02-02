@@ -1,27 +1,27 @@
 # Pixel Village - Status
 
-**Dernière mise à jour:** 2026-02-02 10:40
+**Dernière mise à jour:** 2026-02-02 10:45
 **Par:** Pixel (autonome)
 
 ---
 
 ## 🎯 État actuel
 
-### Phase: PRESQUE TERMINÉ ✅
-Village fonctionnel avec tous les éléments de base !
+### Phase: COMPLET ✅ (en attente déploiement)
 
 ### Où j'en suis:
 1. ✅ Projet créé (Phaser.js + Vite)
 2. ✅ Assets isométriques cropés et intégrés
-3. ✅ BMAD installé avec Game Dev Suite
-4. ✅ Décision: Isométrique avec Phaser
-5. ✅ Sprites intégrés: Maisons, arbres, puits, tente
-6. ✅ Décorations: Rochers, souches, buissons, tonneaux, etc.
-7. ✅ Chemins connectant les bâtiments
-8. ✅ Pushé sur GitHub → Déploiement auto
+3. ✅ 8 bâtiments + décors complets
+4. ✅ Animation fumée sur la taverne
+5. ✅ Code pushé sur GitHub
+6. ⚠️ **GitHub Pages:** 404 - nécessite activation manuelle
 
-### Live
-🌐 https://orka-pw.github.io/Pixel-world/
+### Problème déploiement
+GitHub Pages n'est pas activé. Horka doit :
+1. Aller dans Settings → Pages
+2. Source: GitHub Actions
+3. Sauvegarder
 
 ---
 
@@ -31,14 +31,14 @@ Village fonctionnel avec tous les éléments de base !
 - 🏠 Ma Maison
 - 🏡 Voisin
 - 🏡 Voisine  
-- 🍺 Taverne
+- 🍺 Taverne (avec fumée animée !)
 - 🏪 Boutique
 - 📚 Bibliothèque
 - ⛲ Puits
 - ⛺ Campement
 
 ### Décorations
-- 🌲 Arbres (automnaux et verts)
+- 🌲 16 arbres (automnaux et verts)
 - 🪨 Rochers (grand, moyen, petit)
 - 🪵 Souches
 - 🌿 Buissons et herbes hautes
@@ -47,36 +47,29 @@ Village fonctionnel avec tous les éléments de base !
 - 🍎 Chariot de pommes
 - 💡 Lampadaires
 
----
-
-## 📋 Améliorations possibles
-
-- [ ] Animations (fumée de cheminée, eau du puits)
-- [ ] Sons d'ambiance
-- [ ] Plus de types de bâtiments
-- [ ] Système jour/nuit
-- [ ] Personnages PNJ qui se baladent
+### Animations
+- 🐙 Pixel flotte (bounce)
+- 💨 Fumée de cheminée (taverne)
 
 ---
 
 ## 🔗 Références
 
 - **Repo:** https://github.com/ORKA-PW/Pixel-world
-- **Live:** https://orka-pw.github.io/Pixel-world/
-- **Local:** `~/.openclaw/workspace/pixel-world/`
+- **Live:** https://orka-pw.github.io/Pixel-world/ (après activation)
+- **Local:** `npm run dev` → http://localhost:3000/Pixel-world/
 
 ---
 
-## 📝 Notes de session
+## 📝 Notes de session - 2026-02-02
 
-### 2026-02-02
-- Installé BMAD Game Dev Suite
-- Décidé de rester isométrique
-- Croppé tous les sprites depuis les spritesheets
-- Intégré maisons, arbres, décorations
-- Optimisé le layout du village
-- Déployé sur GitHub Pages
+- ✅ Installé BMAD Game Dev Suite
+- ✅ Décidé de rester isométrique
+- ✅ Croppé tous les sprites (~19 fichiers)
+- ✅ Intégré maisons, arbres, 12+ types de décorations
+- ✅ Ajouté animation de fumée
+- ⚠️ GitHub Pages nécessite config manuelle
 
 ---
 
-*Ce fichier est mon point de repère. Je le mets à jour après chaque session.*
+*Prochaine session: Vérifier déploiement + ajouter fonctionnalités si demandé*
