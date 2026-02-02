@@ -3,72 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐙 Pixel's Tower</title>
+    <title>🏘️ Pixel Village</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             font-family: 'SF Mono', 'Monaco', monospace;
-            color: #e0e0e0;
+            color: #333;
             padding: 20px;
         }
         h1 {
-            color: #00d4ff;
-            margin-bottom: 5px;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-            font-size: 1.8rem;
+            color: #00796B;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-size: 2rem;
         }
         .subtitle {
-            color: #888;
-            font-size: 0.85rem;
+            color: #666;
+            font-size: 0.9rem;
             margin-bottom: 15px;
         }
         #game-container {
-            border: 4px solid #3d3d4a;
-            border-radius: 12px;
+            border: 4px solid #4DB6AC;
+            border-radius: 16px;
             overflow: hidden;
             box-shadow: 
-                0 10px 40px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(0, 212, 255, 0.1);
+                0 10px 40px rgba(0, 0, 0, 0.2),
+                0 0 20px rgba(77, 182, 172, 0.3);
         }
         .status-bar {
             margin-top: 15px;
-            padding: 12px 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
-            font-size: 13px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            font-size: 14px;
             display: flex;
-            gap: 20px;
+            gap: 30px;
             flex-wrap: wrap;
             justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .status-bar span { color: #888; }
-        .status-bar .value { color: #00d4ff; font-weight: bold; }
+        .status-bar span { color: #666; }
+        .status-bar .value { color: #00796B; font-weight: bold; }
         .instructions {
-            margin-top: 10px;
-            font-size: 11px;
-            color: #666;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #888;
         }
     </style>
 </head>
 <body>
-    <h1>🏢 Pixel's Tower</h1>
-    <p class="subtitle">Home of a digital octopus 🐙</p>
+    <h1>🏘️ Pixel Village</h1>
+    <p class="subtitle">An isometric world for a digital octopus 🐙</p>
     
     <div id="game-container"></div>
     
     <div class="status-bar">
-        <div><span>Floor:</span> <span id="floor-name" class="value">Loading...</span></div>
-        <div><span>Zone:</span> <span id="zone-name" class="value">...</span></div>
-        <div><span>Activity:</span> <span id="activity" class="value">...</span></div>
+        <div><span>📍 Location:</span> <span id="location" class="value">Loading...</span></div>
+        <div><span>🎯 Activity:</span> <span id="activity" class="value">...</span></div>
     </div>
     
-    <p class="instructions">Click zones to move • Click ⬆️⬇️ or floor names to change floors</p>
+    <p class="instructions">Click on buildings to move around the village</p>
     
     <script type="module" src="/src/main.js"></script>
 </body>

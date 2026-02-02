@@ -1,99 +1,94 @@
 import Phaser from 'phaser';
 
-// Configuration
-const TILE_SIZE = 24;
-const MAP_WIDTH = 28;
-const MAP_HEIGHT = 20;
+// Isometric configuration
+const TILE_WIDTH = 128;
+const TILE_HEIGHT = 64;
+const MAP_SIZE = 12;
 
-// Étages de la tour
-const FLOORS = {
-    basement: {
-        name: "Sous-sol 🔒",
-        index: -1,
-        bgColor: 0x1a1a24,
-        floorColor: 0x3d3d4a,
-        zones: {
-            server: { x: 2, y: 2, w: 8, h: 6, color: 0x2980b9, name: "Salle Serveur", icon: "🖥️", activity: "Processing data..." },
-            archives: { x: 12, y: 2, w: 8, h: 6, color: 0x8e44ad, name: "Archives", icon: "📚", activity: "Reading old memories..." },
-            lab: { x: 2, y: 10, w: 8, h: 7, color: 0x27ae60, name: "Labo", icon: "🔬", activity: "Experimenting..." },
-            secret: { x: 12, y: 10, w: 8, h: 7, color: 0xe74c3c, name: "???", icon: "❓", activity: "What's in here?..." }
-        }
+// Convert cartesian to isometric
+function cartToIso(x, y) {
+    return {
+        x: (x - y) * (TILE_WIDTH / 2),
+        y: (x + y) * (TILE_HEIGHT / 2)
+    };
+}
+
+// Buildings in the village with asset positions
+const BUILDINGS = {
+    home: { 
+        gridX: 3, gridY: 3, 
+        name: "🏠 Ma Maison", 
+        activity: "Relaxing at home...",
+        sprite: 'house1',
+        scale: 0.35
     },
-    ground: {
-        name: "RDC - Bureau 💼",
-        index: 0,
-        bgColor: 0x2C3E50,
-        floorColor: 0x8B7355,
-        zones: {
-            desk: { x: 2, y: 2, w: 7, h: 5, color: 0x3498db, name: "Mon Bureau", icon: "💻", activity: "Working hard..." },
-            meeting: { x: 11, y: 2, w: 7, h: 5, color: 0x9b59b6, name: "Salle Réunion", icon: "👥", activity: "In a meeting..." },
-            reception: { x: 20, y: 2, w: 6, h: 5, color: 0x1abc9c, name: "Accueil", icon: "🚪", activity: "Welcoming visitors..." },
-            breakroom: { x: 2, y: 9, w: 7, h: 5, color: 0xe67e22, name: "Pause Café", icon: "☕", activity: "Coffee break!" },
-            openspace: { x: 11, y: 9, w: 15, h: 8, color: 0x34495e, name: "Open Space", icon: "🏢", activity: "Collaborating..." }
-        }
+    workshop: { 
+        gridX: 7, gridY: 2, 
+        name: "🔨 Atelier", 
+        activity: "Crafting things...",
+        sprite: 'house2',
+        scale: 0.35
     },
-    floor1: {
-        name: "Étage 1 - Maison 🏠",
-        index: 1,
-        bgColor: 0x2C3E50,
-        floorColor: 0x9B8465,
-        zones: {
-            livingroom: { x: 2, y: 2, w: 8, h: 6, color: 0x9b59b6, name: "Salon", icon: "🛋️", activity: "Relaxing..." },
-            kitchen: { x: 12, y: 2, w: 7, h: 6, color: 0xe74c3c, name: "Cuisine", icon: "🍳", activity: "Cooking something..." },
-            bedroom: { x: 21, y: 2, w: 5, h: 6, color: 0x3498db, name: "Chambre", icon: "🛏️", activity: "Sleeping zzz..." },
-            bathroom: { x: 2, y: 10, w: 5, h: 5, color: 0x1abc9c, name: "SdB", icon: "🚿", activity: "Freshening up..." },
-            meditation: { x: 9, y: 10, w: 6, h: 7, color: 0xf39c12, name: "Zen Zone", icon: "🧘", activity: "Meditating..." },
-            gaming: { x: 17, y: 10, w: 9, h: 7, color: 0x8e44ad, name: "Gaming", icon: "🎮", activity: "Playing games!" }
-        }
+    tavern: { 
+        gridX: 3, gridY: 7, 
+        name: "🍺 Taverne", 
+        activity: "Having a drink...",
+        sprite: 'house3',
+        scale: 0.30
     },
-    floor2: {
-        name: "Étage 2 - Loisirs 🎮",
-        index: 2,
-        bgColor: 0x2C3E50,
-        floorColor: 0x7B6345,
-        zones: {
-            library: { x: 2, y: 2, w: 10, h: 7, color: 0x8e44ad, name: "Bibliothèque", icon: "📖", activity: "Reading..." },
-            cinema: { x: 14, y: 2, w: 12, h: 7, color: 0x2c3e50, name: "Home Cinema", icon: "🎬", activity: "Watching a movie..." },
-            music: { x: 2, y: 11, w: 8, h: 6, color: 0xe74c3c, name: "Studio Musique", icon: "🎵", activity: "Making music..." },
-            art: { x: 12, y: 11, w: 8, h: 6, color: 0xf39c12, name: "Atelier Art", icon: "🎨", activity: "Creating art..." },
-            gym: { x: 22, y: 11, w: 4, h: 6, color: 0x27ae60, name: "Gym", icon: "💪", activity: "Working out!" }
-        }
-    },
-    rooftop: {
-        name: "Rooftop 🌙",
-        index: 3,
-        bgColor: 0x1a1a2e,
-        floorColor: 0x4a4a5a,
-        zones: {
-            terrace: { x: 2, y: 2, w: 12, h: 8, color: 0x27ae60, name: "Terrasse", icon: "🌿", activity: "Enjoying the view..." },
-            telescope: { x: 16, y: 2, w: 10, h: 8, color: 0x3498db, name: "Observatoire", icon: "🔭", activity: "Stargazing..." },
-            garden: { x: 2, y: 12, w: 10, h: 5, color: 0x2ecc71, name: "Jardin", icon: "🌻", activity: "Gardening..." },
-            pool: { x: 14, y: 12, w: 12, h: 5, color: 0x1abc9c, name: "Piscine", icon: "🏊", activity: "Swimming!" }
-        }
+    market: { 
+        gridX: 8, gridY: 6, 
+        name: "🏪 Marché", 
+        activity: "Shopping...",
+        sprite: 'cart',
+        scale: 0.5
     }
 };
 
+// Decorations
+const DECORATIONS = [
+    { gridX: 1, gridY: 1, sprite: 'tree1', scale: 0.4 },
+    { gridX: 10, gridY: 1, sprite: 'tree2', scale: 0.35 },
+    { gridX: 1, gridY: 9, sprite: 'tree1', scale: 0.4 },
+    { gridX: 10, gridY: 9, sprite: 'tree2', scale: 0.35 },
+    { gridX: 5, gridY: 1, sprite: 'rock', scale: 0.25 },
+    { gridX: 6, gridY: 10, sprite: 'well', scale: 0.3 },
+];
+
 let pixel;
-let currentFloor = 'ground';
-let currentZone = 'desk';
+let currentBuilding = 'home';
 let isMoving = false;
 
-class MainScene extends Phaser.Scene {
+class VillageScene extends Phaser.Scene {
     constructor() {
-        super({ key: 'MainScene' });
+        super({ key: 'VillageScene' });
+    }
+
+    preload() {
+        // Load spritesheets
+        this.load.image('terrain', '/assets/village/Isometric Assets 1.png');
+        this.load.image('objects', '/assets/village/Isometric Assets 2.png');
+        this.load.image('houses', '/assets/village/Isometric Assets 3.png');
+        this.load.image('carts', '/assets/village/Isometric Assets 4.png');
     }
 
     create() {
-        // Initial floor
-        this.drawFloor(currentFloor);
-        
-        // Create Pixel
+        // Center the view
+        const centerX = this.cameras.main.width / 2;
+        const centerY = 120;
+
+        // Create layers
+        this.groundLayer = this.add.container(centerX, centerY);
+        this.decorLayer = this.add.container(centerX, centerY);
+        this.buildingLayer = this.add.container(centerX, centerY);
+        this.characterLayer = this.add.container(centerX, centerY);
+
+        // Draw everything
+        this.drawGround();
+        this.drawDecorations();
+        this.drawBuildings();
         this.createPixel();
-
-        // UI for floor navigation
-        this.createFloorNav();
-
-        // Update UI
+        this.createUI();
         this.updateUI();
 
         // Poll status
@@ -104,296 +99,294 @@ class MainScene extends Phaser.Scene {
         });
     }
 
-    drawFloor(floorKey) {
-        const floor = FLOORS[floorKey];
-        if (!floor) return;
-
-        // Clear previous
-        if (this.floorContainer) {
-            this.floorContainer.destroy();
-        }
-        this.floorContainer = this.add.container(0, 0);
-
-        // Background
-        const bg = this.add.rectangle(
-            MAP_WIDTH * TILE_SIZE / 2,
-            MAP_HEIGHT * TILE_SIZE / 2,
-            MAP_WIDTH * TILE_SIZE,
-            MAP_HEIGHT * TILE_SIZE,
-            floor.bgColor
-        );
-        this.floorContainer.add(bg);
-
-        // Floor tiles
-        for (let x = 1; x < MAP_WIDTH - 1; x++) {
-            for (let y = 1; y < MAP_HEIGHT - 1; y++) {
-                const shade = ((x + y) % 2 === 0) ? 0x101010 : 0x000000;
-                const color = Phaser.Display.Color.ValueToColor(floor.floorColor);
-                const adjusted = Phaser.Display.Color.ValueToColor(floor.floorColor).darken(((x + y) % 2) * 5);
-                const tile = this.add.rectangle(
-                    x * TILE_SIZE + TILE_SIZE / 2,
-                    y * TILE_SIZE + TILE_SIZE / 2,
-                    TILE_SIZE - 1,
-                    TILE_SIZE - 1,
-                    adjusted.color
-                );
-                this.floorContainer.add(tile);
+    drawGround() {
+        // Draw isometric grass tiles
+        for (let y = 0; y < MAP_SIZE; y++) {
+            for (let x = 0; x < MAP_SIZE; x++) {
+                const iso = cartToIso(x, y);
+                
+                // Use cropped grass tile from terrain spritesheet
+                // For now, draw programmatic tiles with texture
+                const tile = this.add.graphics();
+                
+                // Determine tile type
+                const isPath = this.isPathTile(x, y);
+                const baseColor = isPath ? 0x8D6E63 : 0x7CB342;
+                const darkColor = isPath ? 0x6D4C41 : 0x558B2F;
+                
+                // Top face
+                tile.fillStyle(baseColor, 1);
+                tile.beginPath();
+                tile.moveTo(iso.x, iso.y - TILE_HEIGHT / 2);
+                tile.lineTo(iso.x + TILE_WIDTH / 2, iso.y);
+                tile.lineTo(iso.x, iso.y + TILE_HEIGHT / 2);
+                tile.lineTo(iso.x - TILE_WIDTH / 2, iso.y);
+                tile.closePath();
+                tile.fillPath();
+                
+                // Add grass texture dots
+                if (!isPath) {
+                    tile.fillStyle(0x8BC34A, 0.5);
+                    for (let i = 0; i < 5; i++) {
+                        const dotX = iso.x + (Math.random() - 0.5) * TILE_WIDTH * 0.6;
+                        const dotY = iso.y + (Math.random() - 0.5) * TILE_HEIGHT * 0.6;
+                        tile.fillCircle(dotX, dotY, 2);
+                    }
+                }
+                
+                // Border
+                tile.lineStyle(1, darkColor, 0.3);
+                tile.beginPath();
+                tile.moveTo(iso.x, iso.y - TILE_HEIGHT / 2);
+                tile.lineTo(iso.x + TILE_WIDTH / 2, iso.y);
+                tile.lineTo(iso.x, iso.y + TILE_HEIGHT / 2);
+                tile.lineTo(iso.x - TILE_WIDTH / 2, iso.y);
+                tile.closePath();
+                tile.strokePath();
+                
+                this.groundLayer.add(tile);
             }
         }
-
-        // Walls
-        this.drawWalls(floor);
-
-        // Zones
-        for (const [key, zone] of Object.entries(floor.zones)) {
-            this.drawZone(key, zone);
-        }
-
-        // Stairs
-        this.drawStairs(floorKey);
-
-        // Floor title
-        const title = this.add.text(MAP_WIDTH * TILE_SIZE / 2, 12, floor.name, {
-            fontSize: '14px',
-            fontFamily: 'monospace',
-            color: '#ffffff',
-            stroke: '#000000',
-            strokeThickness: 3
-        }).setOrigin(0.5, 0);
-        this.floorContainer.add(title);
-
-        // Bring pixel to front
-        if (pixel) {
-            this.children.bringToTop(pixel);
-        }
     }
 
-    drawWalls(floor) {
-        const wallColor = 0x5D6D7E;
-        
-        // Walls
-        for (let x = 0; x < MAP_WIDTH; x++) {
-            const topWall = this.add.rectangle(x * TILE_SIZE + TILE_SIZE/2, TILE_SIZE/2, TILE_SIZE, TILE_SIZE, wallColor);
-            const bottomWall = this.add.rectangle(x * TILE_SIZE + TILE_SIZE/2, (MAP_HEIGHT - 0.5) * TILE_SIZE, TILE_SIZE, TILE_SIZE, 0x4A5A6A);
-            this.floorContainer.add(topWall);
-            this.floorContainer.add(bottomWall);
-        }
-        for (let y = 0; y < MAP_HEIGHT; y++) {
-            const leftWall = this.add.rectangle(TILE_SIZE/2, y * TILE_SIZE + TILE_SIZE/2, TILE_SIZE, TILE_SIZE, wallColor);
-            const rightWall = this.add.rectangle((MAP_WIDTH - 0.5) * TILE_SIZE, y * TILE_SIZE + TILE_SIZE/2, TILE_SIZE, TILE_SIZE, wallColor);
-            this.floorContainer.add(leftWall);
-            this.floorContainer.add(rightWall);
-        }
-
-        // Windows (top wall)
-        const window1 = this.add.rectangle(8 * TILE_SIZE, TILE_SIZE/2, 4 * TILE_SIZE, TILE_SIZE - 8, 0x87CEEB);
-        const window2 = this.add.rectangle(20 * TILE_SIZE, TILE_SIZE/2, 4 * TILE_SIZE, TILE_SIZE - 8, 0x87CEEB);
-        this.floorContainer.add(window1);
-        this.floorContainer.add(window2);
+    isPathTile(x, y) {
+        const pathTiles = [
+            [4, 3], [5, 3], [6, 3], [5, 4], [5, 5], [5, 6], [4, 6], [4, 7],
+            [6, 4], [7, 4], [7, 5], [7, 6], [8, 5]
+        ];
+        return pathTiles.some(([px, py]) => px === x && py === y);
     }
 
-    drawZone(key, zone) {
-        const baseX = zone.x * TILE_SIZE;
-        const baseY = zone.y * TILE_SIZE;
-        const width = zone.w * TILE_SIZE;
-        const height = zone.h * TILE_SIZE;
-
-        // Zone background
-        const zoneRect = this.add.rectangle(
-            baseX + width / 2,
-            baseY + height / 2,
-            width - 8,
-            height - 8,
-            zone.color,
-            0.25
+    drawDecorations() {
+        // Sort by depth
+        const sorted = [...DECORATIONS].sort((a, b) => 
+            (a.gridX + a.gridY) - (b.gridX + b.gridY)
         );
-        zoneRect.setStrokeStyle(2, zone.color, 0.8);
-        this.floorContainer.add(zoneRect);
 
-        // Zone label
-        const label = this.add.text(
-            baseX + 8,
-            baseY + 8,
-            zone.icon + ' ' + zone.name,
-            {
-                fontSize: '10px',
+        sorted.forEach(deco => {
+            const iso = cartToIso(deco.gridX, deco.gridY);
+            this.drawDecoSprite(iso.x, iso.y, deco.sprite, deco.scale);
+        });
+    }
+
+    drawDecoSprite(x, y, type, scale) {
+        const graphics = this.add.graphics();
+        
+        switch(type) {
+            case 'tree1':
+                // Conifer tree
+                graphics.fillStyle(0x5D4037, 1);
+                graphics.fillRect(x - 8, y - 20, 16, 40);
+                graphics.fillStyle(0x33691E, 1);
+                graphics.fillTriangle(x, y - 120, x - 50, y - 20, x + 50, y - 20);
+                graphics.fillStyle(0x558B2F, 1);
+                graphics.fillTriangle(x, y - 100, x - 40, y - 30, x + 40, y - 30);
+                graphics.fillStyle(0x689F38, 1);
+                graphics.fillTriangle(x, y - 80, x - 30, y - 40, x + 30, y - 40);
+                break;
+            case 'tree2':
+                // Deciduous tree
+                graphics.fillStyle(0x5D4037, 1);
+                graphics.fillRect(x - 10, y - 30, 20, 50);
+                graphics.fillStyle(0x8BC34A, 1);
+                graphics.fillCircle(x, y - 70, 50);
+                graphics.fillStyle(0x7CB342, 1);
+                graphics.fillCircle(x - 25, y - 55, 35);
+                graphics.fillCircle(x + 25, y - 55, 35);
+                break;
+            case 'rock':
+                graphics.fillStyle(0x757575, 1);
+                graphics.fillCircle(x, y - 15, 25);
+                graphics.fillStyle(0x9E9E9E, 1);
+                graphics.fillCircle(x - 5, y - 20, 15);
+                break;
+            case 'well':
+                graphics.fillStyle(0x795548, 1);
+                graphics.fillRect(x - 20, y - 10, 40, 30);
+                graphics.fillStyle(0x5D4037, 1);
+                graphics.fillRect(x - 25, y - 40, 10, 35);
+                graphics.fillRect(x + 15, y - 40, 10, 35);
+                graphics.fillRect(x - 25, y - 45, 50, 8);
+                graphics.fillStyle(0x3E2723, 1);
+                graphics.fillCircle(x, y, 15);
+                break;
+        }
+        
+        this.decorLayer.add(graphics);
+    }
+
+    drawBuildings() {
+        // Sort by depth
+        const sorted = Object.entries(BUILDINGS).sort((a, b) => 
+            (a[1].gridX + a[1].gridY) - (b[1].gridX + b[1].gridY)
+        );
+
+        sorted.forEach(([key, building]) => {
+            const iso = cartToIso(building.gridX, building.gridY);
+            
+            // Draw building based on sprite type
+            const buildingContainer = this.add.container(iso.x, iso.y);
+            
+            if (building.sprite === 'cart') {
+                this.drawCart(buildingContainer);
+            } else {
+                this.drawHouse(buildingContainer, building.sprite);
+            }
+            
+            this.buildingLayer.add(buildingContainer);
+
+            // Label
+            const label = this.add.text(iso.x, iso.y - 150, building.name, {
+                fontSize: '13px',
                 fontFamily: 'monospace',
                 color: '#ffffff',
                 stroke: '#000000',
-                strokeThickness: 2
-            }
-        );
-        this.floorContainer.add(label);
+                strokeThickness: 4
+            }).setOrigin(0.5);
+            this.buildingLayer.add(label);
 
-        // Make clickable
-        zoneRect.setInteractive();
-        zoneRect.on('pointerdown', () => this.moveToZone(key));
-        zoneRect.on('pointerover', () => {
-            zoneRect.setFillStyle(zone.color, 0.4);
-            document.body.style.cursor = 'pointer';
+            // Clickable area
+            const hitArea = this.add.zone(iso.x, iso.y - 60, 120, 150)
+                .setInteractive()
+                .on('pointerdown', () => this.moveToBuilding(key))
+                .on('pointerover', () => {
+                    document.body.style.cursor = 'pointer';
+                    buildingContainer.setScale(1.05);
+                })
+                .on('pointerout', () => {
+                    document.body.style.cursor = 'default';
+                    buildingContainer.setScale(1);
+                });
+            this.buildingLayer.add(hitArea);
         });
-        zoneRect.on('pointerout', () => {
-            zoneRect.setFillStyle(zone.color, 0.25);
-            document.body.style.cursor = 'default';
-        });
-
-        // Add some furniture placeholders
-        this.addFurniture(zone, baseX, baseY);
     }
 
-    addFurniture(zone, baseX, baseY) {
-        // Simple furniture based on zone type
-        const centerX = baseX + zone.w * TILE_SIZE / 2;
-        const centerY = baseY + zone.h * TILE_SIZE / 2;
-
-        // Random furniture pieces
-        const numItems = Math.min(3, Math.floor(zone.w * zone.h / 15));
-        for (let i = 0; i < numItems; i++) {
-            const offsetX = (Math.random() - 0.5) * (zone.w - 2) * TILE_SIZE;
-            const offsetY = (Math.random() - 0.5) * (zone.h - 2) * TILE_SIZE;
-            const size = 15 + Math.random() * 20;
-            
-            const furniture = this.add.rectangle(
-                centerX + offsetX,
-                centerY + offsetY,
-                size,
-                size * (0.5 + Math.random() * 0.5),
-                Phaser.Display.Color.ValueToColor(zone.color).darken(30).color
-            );
-            this.floorContainer.add(furniture);
-        }
-    }
-
-    drawStairs(floorKey) {
-        const floorKeys = Object.keys(FLOORS);
-        const currentIndex = floorKeys.indexOf(floorKey);
-
-        // Stairs up
-        if (currentIndex < floorKeys.length - 1) {
-            const stairsUp = this.add.rectangle(
-                (MAP_WIDTH - 2) * TILE_SIZE,
-                3 * TILE_SIZE,
-                TILE_SIZE * 1.5,
-                TILE_SIZE * 2,
-                0x27ae60
-            );
-            stairsUp.setStrokeStyle(2, 0x2ecc71);
-            this.floorContainer.add(stairsUp);
-
-            const upLabel = this.add.text(
-                (MAP_WIDTH - 2) * TILE_SIZE,
-                3 * TILE_SIZE,
-                '⬆️',
-                { fontSize: '20px' }
-            ).setOrigin(0.5);
-            this.floorContainer.add(upLabel);
-
-            stairsUp.setInteractive();
-            stairsUp.on('pointerdown', () => this.changeFloor(1));
-            stairsUp.on('pointerover', () => document.body.style.cursor = 'pointer');
-            stairsUp.on('pointerout', () => document.body.style.cursor = 'default');
-        }
-
-        // Stairs down
-        if (currentIndex > 0) {
-            const stairsDown = this.add.rectangle(
-                (MAP_WIDTH - 2) * TILE_SIZE,
-                6 * TILE_SIZE,
-                TILE_SIZE * 1.5,
-                TILE_SIZE * 2,
-                0xe74c3c
-            );
-            stairsDown.setStrokeStyle(2, 0xc0392b);
-            this.floorContainer.add(stairsDown);
-
-            const downLabel = this.add.text(
-                (MAP_WIDTH - 2) * TILE_SIZE,
-                6 * TILE_SIZE,
-                '⬇️',
-                { fontSize: '20px' }
-            ).setOrigin(0.5);
-            this.floorContainer.add(downLabel);
-
-            stairsDown.setInteractive();
-            stairsDown.on('pointerdown', () => this.changeFloor(-1));
-            stairsDown.on('pointerover', () => document.body.style.cursor = 'pointer');
-            stairsDown.on('pointerout', () => document.body.style.cursor = 'default');
-        }
-    }
-
-    createFloorNav() {
-        const navY = MAP_HEIGHT * TILE_SIZE + 10;
-        const floorKeys = Object.keys(FLOORS);
+    drawHouse(container, type) {
+        const g = this.add.graphics();
         
-        this.floorButtons = [];
-        
-        floorKeys.forEach((key, index) => {
-            const floor = FLOORS[key];
-            const x = 60 + index * 130;
-            
-            const btn = this.add.text(x, navY, floor.name, {
-                fontSize: '11px',
-                fontFamily: 'monospace',
-                color: key === currentFloor ? '#00d4ff' : '#888888',
-                stroke: '#000000',
-                strokeThickness: 2
-            }).setInteractive();
+        // Base/foundation
+        g.fillStyle(0x5D4037, 1);
+        g.beginPath();
+        g.moveTo(0, 0);
+        g.lineTo(50, -25);
+        g.lineTo(0, -50);
+        g.lineTo(-50, -25);
+        g.closePath();
+        g.fillPath();
 
-            btn.floorKey = key;
-            btn.on('pointerdown', () => {
-                currentFloor = key;
-                this.drawFloor(key);
-                this.updateFloorNav();
-                
-                // Move pixel to first zone of new floor
-                const firstZone = Object.keys(floor.zones)[0];
-                currentZone = firstZone;
-                this.moveToZone(firstZone, false);
-                this.updateUI();
+        // Front wall
+        g.fillStyle(0x8D6E63, 1);
+        g.fillRect(-50, -25, 50, -80);
+        g.beginPath();
+        g.moveTo(-50, -25);
+        g.lineTo(-50, -105);
+        g.lineTo(0, -130);
+        g.lineTo(0, -50);
+        g.closePath();
+        g.fillPath();
+
+        // Side wall
+        g.fillStyle(0x6D4C41, 1);
+        g.beginPath();
+        g.moveTo(0, -50);
+        g.lineTo(0, -130);
+        g.lineTo(50, -105);
+        g.lineTo(50, -25);
+        g.closePath();
+        g.fillPath();
+
+        // Roof
+        g.fillStyle(0xD84315, 1);
+        g.beginPath();
+        g.moveTo(0, -160);
+        g.lineTo(-60, -105);
+        g.lineTo(0, -130);
+        g.lineTo(60, -105);
+        g.closePath();
+        g.fillPath();
+        
+        // Roof side
+        g.fillStyle(0xBF360C, 1);
+        g.beginPath();
+        g.moveTo(0, -160);
+        g.lineTo(60, -105);
+        g.lineTo(60, -95);
+        g.lineTo(0, -150);
+        g.closePath();
+        g.fillPath();
+
+        // Door
+        g.fillStyle(0x4E342E, 1);
+        g.fillRect(-35, -25, 20, -35);
+        
+        // Window
+        g.fillStyle(0x81D4FA, 1);
+        g.fillRect(-30, -75, 15, 15);
+        g.fillRect(15, -95, 15, 15);
+
+        // Autumn leaves on roof
+        if (type === 'house1' || type === 'house2') {
+            g.fillStyle(0xFF9800, 0.8);
+            [[-30, -135], [-15, -145], [15, -130], [30, -120]].forEach(([lx, ly]) => {
+                g.fillCircle(lx, ly, 8);
             });
-            btn.on('pointerover', () => btn.setColor('#ffffff'));
-            btn.on('pointerout', () => btn.setColor(btn.floorKey === currentFloor ? '#00d4ff' : '#888888'));
-
-            this.floorButtons.push(btn);
-        });
-    }
-
-    updateFloorNav() {
-        this.floorButtons.forEach(btn => {
-            btn.setColor(btn.floorKey === currentFloor ? '#00d4ff' : '#888888');
-        });
-    }
-
-    changeFloor(direction) {
-        const floorKeys = Object.keys(FLOORS);
-        const currentIndex = floorKeys.indexOf(currentFloor);
-        const newIndex = currentIndex + direction;
-
-        if (newIndex >= 0 && newIndex < floorKeys.length) {
-            currentFloor = floorKeys[newIndex];
-            this.drawFloor(currentFloor);
-            this.updateFloorNav();
-
-            // Move pixel to stairs area
-            const floor = FLOORS[currentFloor];
-            const firstZone = Object.keys(floor.zones)[0];
-            currentZone = firstZone;
-            this.moveToZone(firstZone, false);
-            this.updateUI();
+            g.fillStyle(0xF57C00, 0.8);
+            [[-20, -140], [5, -138], [25, -125]].forEach(([lx, ly]) => {
+                g.fillCircle(lx, ly, 6);
+            });
         }
+
+        container.add(g);
+    }
+
+    drawCart(container) {
+        const g = this.add.graphics();
+        
+        // Cart body
+        g.fillStyle(0x6D4C41, 1);
+        g.beginPath();
+        g.moveTo(-30, 0);
+        g.lineTo(30, 0);
+        g.lineTo(40, -10);
+        g.lineTo(40, -35);
+        g.lineTo(-40, -35);
+        g.lineTo(-40, -10);
+        g.closePath();
+        g.fillPath();
+        
+        // Wheels
+        g.fillStyle(0x4E342E, 1);
+        g.fillCircle(-25, 5, 15);
+        g.fillCircle(25, 5, 15);
+        g.fillStyle(0x3E2723, 1);
+        g.fillCircle(-25, 5, 8);
+        g.fillCircle(25, 5, 8);
+        
+        // Apples in cart
+        g.fillStyle(0xC62828, 1);
+        [[-20, -40], [-5, -45], [10, -40], [0, -38], [-15, -42], [15, -43]].forEach(([ax, ay]) => {
+            g.fillCircle(ax, ay, 8);
+        });
+        g.fillStyle(0x388E3C, 1);
+        [[-20, -48], [0, -52], [12, -48]].forEach(([lx, ly]) => {
+            g.fillRect(lx, ly, 3, 5);
+        });
+
+        container.add(g);
     }
 
     createPixel() {
-        const floor = FLOORS[currentFloor];
-        const zone = floor.zones[currentZone];
+        const building = BUILDINGS[currentBuilding];
+        const iso = cartToIso(building.gridX, building.gridY);
 
-        pixel = this.add.container(
-            (zone.x + zone.w / 2) * TILE_SIZE,
-            (zone.y + zone.h / 2) * TILE_SIZE
-        );
+        pixel = this.add.container(iso.x, iso.y - 30);
+
+        // Shadow
+        const shadow = this.add.ellipse(0, 20, 40, 15, 0x000000, 0.3);
+        pixel.add(shadow);
 
         // Glow
-        const glow = this.add.circle(0, 0, 25, 0x00d4ff, 0.15);
+        const glow = this.add.circle(0, 0, 30, 0x00d4ff, 0.15);
         pixel.add(glow);
 
         // Body
@@ -401,94 +394,102 @@ class MainScene extends Phaser.Scene {
         
         // Head
         body.fillStyle(0x00d4ff, 1);
-        body.fillCircle(0, -6, 16);
+        body.fillCircle(0, -8, 20);
         
         // Tentacles
         body.fillStyle(0x00a8cc, 1);
-        [-12, -6, 0, 6, 12].forEach((x, i) => {
-            body.fillEllipse(x, 8 + Math.abs(x) * 0.2, 5, 12);
+        [-16, -8, 0, 8, 16].forEach((x) => {
+            body.fillEllipse(x, 12, 7, 16);
         });
 
         // Eyes
         body.fillStyle(0xffffff, 1);
-        body.fillCircle(-6, -8, 5);
-        body.fillCircle(6, -8, 5);
+        body.fillCircle(-8, -10, 7);
+        body.fillCircle(8, -10, 7);
         body.fillStyle(0x1a1a2e, 1);
-        body.fillCircle(-5, -7, 3);
-        body.fillCircle(7, -7, 3);
+        body.fillCircle(-6, -9, 4);
+        body.fillCircle(10, -9, 4);
         body.fillStyle(0xffffff, 1);
-        body.fillCircle(-3, -9, 1.5);
-        body.fillCircle(9, -9, 1.5);
+        body.fillCircle(-4, -11, 2);
+        body.fillCircle(12, -11, 2);
 
         // Glasses
         body.lineStyle(2, 0x333333, 1);
-        body.strokeRoundedRect(-12, -14, 10, 9, 2);
-        body.strokeRoundedRect(2, -14, 10, 9, 2);
-        body.lineBetween(-2, -10, 2, -10);
+        body.strokeRoundedRect(-16, -18, 14, 11, 2);
+        body.strokeRoundedRect(2, -18, 14, 11, 2);
+        body.lineBetween(-2, -12, 2, -12);
+
+        // Smile
+        body.lineStyle(2, 0x0288D1, 1);
+        body.beginPath();
+        body.arc(0, -2, 8, 0.2, Math.PI - 0.2);
+        body.strokePath();
 
         pixel.add(body);
+        this.characterLayer.add(pixel);
 
-        // Animations
+        // Float animation
         this.tweens.add({
             targets: pixel,
-            y: pixel.y - 5,
-            duration: 1000,
+            y: pixel.y - 10,
+            duration: 1200,
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
     }
 
-    moveToZone(zoneName, animate = true) {
-        const floor = FLOORS[currentFloor];
-        if (!floor || !floor.zones[zoneName]) return;
-        if (isMoving && animate) return;
+    moveToBuilding(buildingKey) {
+        if (isMoving || !BUILDINGS[buildingKey]) return;
 
-        const zone = floor.zones[zoneName];
-        const targetX = (zone.x + zone.w / 2) * TILE_SIZE;
-        const targetY = (zone.y + zone.h / 2) * TILE_SIZE;
+        const building = BUILDINGS[buildingKey];
+        const iso = cartToIso(building.gridX, building.gridY);
+        
+        isMoving = true;
+        currentBuilding = buildingKey;
 
-        currentZone = zoneName;
+        this.tweens.killTweensOf(pixel);
 
-        if (animate) {
-            isMoving = true;
-            this.tweens.killTweensOf(pixel);
-
-            this.tweens.add({
-                targets: pixel,
-                x: targetX,
-                y: targetY,
-                duration: 500,
-                ease: 'Back.easeOut',
-                onComplete: () => {
-                    isMoving = false;
-                    this.updateUI();
-                    this.tweens.add({
-                        targets: pixel,
-                        y: pixel.y - 5,
-                        duration: 1000,
-                        yoyo: true,
-                        repeat: -1,
-                        ease: 'Sine.easeInOut'
-                    });
-                }
-            });
-        } else {
-            pixel.x = targetX;
-            pixel.y = targetY;
-        }
+        this.tweens.add({
+            targets: pixel,
+            x: iso.x,
+            y: iso.y - 30,
+            duration: 800,
+            ease: 'Power2',
+            onComplete: () => {
+                isMoving = false;
+                this.updateUI();
+                
+                this.tweens.add({
+                    targets: pixel,
+                    y: pixel.y - 10,
+                    duration: 1200,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            }
+        });
 
         this.updateUI();
     }
 
+    createUI() {
+        // Title
+        this.add.text(this.cameras.main.width / 2, 25, '🏘️ Pixel Village', {
+            fontSize: '28px',
+            fontFamily: 'monospace',
+            color: '#2E7D32',
+            stroke: '#ffffff',
+            strokeThickness: 4
+        }).setOrigin(0.5);
+    }
+
     updateUI() {
-        const floor = FLOORS[currentFloor];
-        const zone = floor?.zones[currentZone];
-        
-        if (zone) {
-            document.getElementById('zone-name').textContent = zone.icon + ' ' + zone.name;
-            document.getElementById('activity').textContent = zone.activity;
-            document.getElementById('floor-name').textContent = floor.name;
+        const building = BUILDINGS[currentBuilding];
+        if (building) {
+            document.getElementById('location').textContent = building.name;
+            document.getElementById('activity').textContent = building.activity;
         }
     }
 
@@ -497,37 +498,26 @@ class MainScene extends Phaser.Scene {
             const response = await fetch('/status.json?' + Date.now());
             if (response.ok) {
                 const data = await response.json();
-                
-                if (data.floor && data.floor !== currentFloor && FLOORS[data.floor]) {
-                    currentFloor = data.floor;
-                    this.drawFloor(currentFloor);
-                    this.updateFloorNav();
+                if (data.building && data.building !== currentBuilding && BUILDINGS[data.building]) {
+                    this.moveToBuilding(data.building);
                 }
-                
-                const floor = FLOORS[currentFloor];
-                if (data.zone && data.zone !== currentZone && floor.zones[data.zone]) {
-                    this.moveToZone(data.zone);
-                }
-                
                 if (data.activity) {
                     document.getElementById('activity').textContent = data.activity;
                 }
             }
-        } catch (e) {
-            // Demo mode
-        }
+        } catch (e) {}
     }
 }
 
 // Config
 const config = {
     type: Phaser.AUTO,
-    width: MAP_WIDTH * TILE_SIZE,
-    height: MAP_HEIGHT * TILE_SIZE + 35,
+    width: 950,
+    height: 650,
     parent: 'game-container',
-    backgroundColor: '#1a1a2e',
-    scene: MainScene,
-    pixelArt: true
+    backgroundColor: '#87CEEB',
+    scene: VillageScene,
+    pixelArt: false
 };
 
 new Phaser.Game(config);

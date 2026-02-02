@@ -1,6 +1,5 @@
 {
-    "floor": "ground",
-    "zone": "desk",
-    "activity": "Building my tower! 🏗️",
-    "lastUpdate": "2026-02-02T09:05:00Z"
+    "building": "home",
+    "activity": "Chilling at home 🏠",
+    "lastUpdate": "2026-02-02T09:30:00Z"
 }
