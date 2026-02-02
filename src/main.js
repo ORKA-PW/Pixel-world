@@ -228,6 +228,11 @@ class VillageScene extends Phaser.Scene {
         sprite.setOrigin(0.5, 1);
         
         this.objectLayer.add(sprite);
+        
+        // Add smoke animation to tavern
+        if (building.type === 'largeHouse' && building.name.includes('Taverne')) {
+            this.createSmoke(iso.x + 20, iso.y - 140);
+        }
 
         // Label
         const labelOffsets = {
@@ -271,6 +276,32 @@ class VillageScene extends Phaser.Scene {
         sprite.setScale(0.16);
         sprite.setOrigin(0.5, 1);
         this.objectLayer.add(sprite);
+    }
+
+    createSmoke(x, y) {
+        // Create simple smoke puffs
+        const createPuff = () => {
+            const puff = this.add.circle(x + Phaser.Math.Between(-5, 5), y, Phaser.Math.Between(4, 8), 0x666666, 0.5);
+            this.objectLayer.add(puff);
+            
+            this.tweens.add({
+                targets: puff,
+                y: y - 50,
+                alpha: 0,
+                scale: 2,
+                duration: 2000,
+                ease: 'Sine.easeOut',
+                onComplete: () => puff.destroy()
+            });
+        };
+        
+        // Emit smoke periodically
+        this.time.addEvent({
+            delay: 800,
+            callback: createPuff,
+            loop: true
+        });
+        createPuff(); // Initial puff
     }
 
     drawDecoration(deco, iso) {
