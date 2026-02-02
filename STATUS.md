@@ -1,33 +1,36 @@
 # Pixel Village - Status
 
-**Dernière mise à jour:** 2026-02-02 10:18
+**Dernière mise à jour:** 2026-02-02 10:30
 **Par:** Pixel (autonome)
 
 ---
 
 ## 🎯 État actuel
 
-### Phase: DÉCISION TECHNIQUE
-Je dois décider du style et de la techno avant de continuer.
+### Phase: DÉVELOPPEMENT ✅
+Sprites intégrés avec succès !
 
 ### Où j'en suis:
 1. ✅ Projet créé (Phaser.js + Vite)
-2. ✅ Assets isométriques disponibles (village pack)
+2. ✅ Assets isométriques disponibles
 3. ✅ BMAD installé avec Game Dev Suite
-4. ⏳ **EN COURS:** Choisir style définitif (iso vs top-down)
-5. ⏳ Améliorer le rendu visuel
+4. ✅ **Décision prise:** Rester isométrique avec Phaser
+5. ✅ **Sprites intégrés:** Maisons, arbres, puits
+6. ⏳ Peaufiner le layout et les positions
 
-### Problème principal:
-Le rendu actuel utilise des `graphics` programmatiques au lieu des vrais sprites. Résultat flat et amateur.
+### Dernière amélioration:
+Les vrais sprites sont maintenant utilisés au lieu des formes programmatiques.
+Rendu BEAUCOUP plus beau avec les maisons automnales et les arbres détaillés.
 
 ---
 
 ## 📋 Prochaines actions
 
-1. [ ] Utiliser BMAD pour brainstorm le style
-2. [ ] Décider: Isométrique (garder assets) ou Top-down (nouveaux assets)
-3. [ ] Si iso: Cropper et intégrer les vrais sprites
-4. [ ] Si top-down: Explorer RPG Maker MZ ou Godot
+1. [ ] Ajuster les positions des bâtiments pour éviter les chevauchements
+2. [ ] Ajouter plus de décorations (rochers, fleurs, etc.)
+3. [ ] Améliorer les chemins visuellement
+4. [ ] Ajouter des animations (fumée cheminée, eau du puits, etc.)
+5. [ ] Déployer sur GitHub Pages
 
 ---
 
@@ -42,11 +45,13 @@ Le rendu actuel utilise des `graphics` programmatiques au lieu des vrais sprites
 
 ## 📝 Notes de session
 
-### 2026-02-02
-- Horka veut un meilleur rendu (refs: Orbit Studio, Stardew Valley style)
+### 2026-02-02 (matin)
+- Horka veut un meilleur rendu (refs: Orbit Studio, Stardew Valley)
 - Installé BMAD v6 avec Game Dev Suite
-- Config: user_name = Pixel, français
-- Horka veut que je sois **full autonome** sur ce projet
+- **Décision:** Rester isométrique, utiliser les vrais sprites
+- Créé script `crop-sprites.js` pour extraire les sprites individuels
+- **Succès:** Sprites intégrés, rendu magnifique !
+- Commit: `feat: Integrate real sprites - houses, trees, well`
 
 ---
 
