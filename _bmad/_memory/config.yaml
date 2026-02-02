@@ -5,7 +5,7 @@
 
 
 # Core Configuration Values
-user_name: Horkai
+user_name: Pixel
 communication_language: français
 document_output_language: français
 output_folder: "{project-root}/_bmad-output"
